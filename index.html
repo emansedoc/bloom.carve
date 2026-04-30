@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pelure — Premium Peeling Fruits</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:   #f9f4ee;
+      --sand:    #e8ddd0;
+      --gold:    #c5a46d;
+      --gold-dk: #9c7d47;
+      --brown:   #3d2b1f;
+      --charcoal:#1a1a1a;
+      --white:   #ffffff;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--cream);
+      color: var(--charcoal);
+      font-family: 'Jost', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.6rem 4rem;
+      background: rgba(249,244,238,0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(197,164,109,0.2);
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.9rem; font-weight: 600; letter-spacing: 0.06em;
+      color: var(--brown); text-decoration: none;
+    }
+    .nav-logo span { color: var(--gold); }
+    .nav-links { display: flex; gap: 2.8rem; list-style: none; }
+    .nav-links a {
+      text-decoration: none; color: var(--brown);
+      font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase;
+      transition: color 0.3s;
+    }
+    .nav-links a:hover { color: var(--gold); }
+    .nav-cta {
+      background: var(--gold); color: var(--white);
+      border: none; padding: 0.65rem 1.8rem;
+      font-family: 'Jost', sans-serif; font-size: 0.78rem;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.3s;
+    }
+    .nav-cta:hover { background: var(--gold-dk); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: grid; grid-template-columns: 1fr 1fr; align-items: center;
+      padding: 8rem 4rem 4rem;
+      background: linear-gradient(135deg, var(--cream) 55%, var(--sand) 100%);
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; right: -120px; top: -120px;
+      width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(197,164,109,0.12) 0%, transparent 70%);
+    }
+    .hero-text { max-width: 540px; }
+    .hero-eyebrow {
+      font-size: 0.72rem; letter-spacing: 0.28em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 1.4rem;
+    }
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3.2rem, 6vw, 5.2rem);
+      font-weight: 300; line-height: 1.1;
+      color: var(--brown); margin-bottom: 1.6rem;
+    }
+    .hero-title em { font-style: italic; color: var(--gold); }
+    .hero-desc {
+      font-size: 1rem; line-height: 1.8; color: #6b5a4e;
+      max-width: 420px; margin-bottom: 2.8rem;
+    }
+    .hero-actions { display: flex; gap: 1.2rem; align-items: center; }
+    .btn-primary {
+      background: var(--brown); color: var(--white);
+      border: none; padding: 1rem 2.6rem;
+      font-family: 'Jost', sans-serif; font-size: 0.82rem;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.3s, transform 0.2s;
+    }
+    .btn-primary:hover { background: var(--gold-dk); transform: translateY(-2px); }
+    .btn-outline {
+      background: transparent; color: var(--brown);
+      border: 1px solid var(--gold); padding: 1rem 2.4rem;
+      font-family: 'Jost', sans-serif; font-size: 0.82rem;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.3s;
+    }
+    .btn-outline:hover { background: var(--gold); color: var(--white); }
+
+    /* hero visual */
+    .hero-visual {
+      display: flex; justify-content: center; align-items: center;
+      position: relative;
+    }
+    .hero-circle {
+      width: 420px; height: 420px; border-radius: 50%;
+      background: linear-gradient(145deg, #e8ddd0, #f5ede3);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 40px 80px rgba(61,43,31,0.15), 0 0 0 1px rgba(197,164,109,0.2);
+      font-size: 10rem; position: relative;
+    }
+    .hero-circle::after {
+      content: '';
+      position: absolute; inset: -12px; border-radius: 50%;
+      border: 1px solid rgba(197,164,109,0.3);
+    }
+    .badge {
+      position: absolute; bottom: 30px; right: -20px;
+      background: var(--brown); color: var(--white);
+      border-radius: 50%; width: 110px; height: 110px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase;
+      text-align: center; line-height: 1.5;
+      box-shadow: 0 12px 30px rgba(61,43,31,0.25);
+    }
+    .badge strong { font-size: 1.1rem; font-family: 'Cormorant Garamond', serif; font-weight: 600; }
+
+    /* ── STRIP ── */
+    .marquee-strip {
+      background: var(--brown); color: var(--gold);
+      padding: 0.85rem 0; overflow: hidden; white-space: nowrap;
+    }
+    .marquee-inner {
+      display: inline-block; animation: marquee 22s linear infinite;
+      font-size: 0.72rem; letter-spacing: 0.26em; text-transform: uppercase;
+    }
+    .marquee-inner span { margin: 0 2.5rem; }
+    @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* ── ABOUT ── */
+    .about {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 6rem; padding: 8rem 4rem; align-items: center;
+    }
+    .about-img-wrap { position: relative; }
+    .about-img-box {
+      width: 100%; aspect-ratio: 3/4;
+      background: linear-gradient(160deg, #ddd0c0, #c8b89a);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 7rem; border-radius: 2px;
+      box-shadow: 0 30px 60px rgba(61,43,31,0.15);
+    }
+    .about-img-accent {
+      position: absolute; bottom: -24px; right: -24px;
+      width: 160px; height: 160px;
+      background: var(--cream); border: 1px solid var(--gold);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.8rem; color: var(--gold);
+    }
+    .about-img-accent small {
+      font-family: 'Jost', sans-serif; font-size: 0.65rem;
+      letter-spacing: 0.16em; text-transform: uppercase; color: var(--brown);
+    }
+    .section-eyebrow {
+      font-size: 0.72rem; letter-spacing: 0.28em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 1rem;
+    }
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 4vw, 3.4rem);
+      font-weight: 300; line-height: 1.15;
+      color: var(--brown); margin-bottom: 1.6rem;
+    }
+    .section-title em { font-style: italic; }
+    .section-body { font-size: 0.98rem; line-height: 1.9; color: #6b5a4e; margin-bottom: 1.8rem; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 0.7rem; }
+    .pill {
+      border: 1px solid var(--gold); color: var(--gold-dk);
+      padding: 0.35rem 1.1rem; font-size: 0.72rem;
+      letter-spacing: 0.14em; text-transform: uppercase;
+    }
+
+    /* ── PRODUCTS ── */
+    .products { padding: 6rem 4rem; background: var(--sand); }
+    .products-header { text-align: center; margin-bottom: 4rem; }
+    .products-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;
+    }
+    .product-card {
+      background: var(--cream); padding: 2.5rem 2rem;
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      transition: transform 0.3s, box-shadow 0.3s;
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+    .product-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 24px 50px rgba(61,43,31,0.12);
+      border-color: rgba(197,164,109,0.3);
+    }
+    .product-emoji { font-size: 5rem; margin-bottom: 1.4rem; }
+    .product-tag {
+      font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 0.5rem;
+    }
+    .product-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.7rem; font-weight: 400; color: var(--brown);
+      margin-bottom: 0.8rem;
+    }
+    .product-desc { font-size: 0.88rem; line-height: 1.7; color: #7a6558; margin-bottom: 1.6rem; }
+    .product-price {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem; color: var(--gold-dk); margin-bottom: 1.4rem;
+    }
+    .product-price span { font-size: 0.8rem; color: #9a8070; vertical-align: super; }
+    .btn-card {
+      background: transparent; border: 1px solid var(--brown); color: var(--brown);
+      padding: 0.6rem 1.8rem; font-family: 'Jost', sans-serif;
+      font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.3s; width: 100%;
+    }
+    .btn-card:hover { background: var(--brown); color: var(--white); }
+    .card-featured { background: var(--brown); color: var(--white); }
+    .card-featured .product-tag { color: var(--gold); }
+    .card-featured .product-name { color: var(--white); }
+    .card-featured .product-desc { color: #c0a98e; }
+    .card-featured .product-price { color: var(--gold); }
+    .card-featured .btn-card {
+      border-color: var(--gold); color: var(--gold);
+    }
+    .card-featured .btn-card:hover { background: var(--gold); color: var(--white); }
+    .featured-ribbon {
+      background: var(--gold); color: var(--white);
+      font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase;
+      padding: 0.3rem 1.1rem; margin-bottom: 1.2rem;
+    }
+
+    /* ── PROCESS ── */
+    .process { padding: 8rem 4rem; }
+    .process-header { text-align: center; margin-bottom: 5rem; }
+    .process-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; }
+    .step { text-align: center; padding: 1rem; }
+    .step-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3.5rem; font-weight: 300; color: rgba(197,164,109,0.3);
+      line-height: 1; margin-bottom: 0.8rem;
+    }
+    .step-icon { font-size: 2.2rem; margin-bottom: 1rem; }
+    .step-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem; color: var(--brown); margin-bottom: 0.6rem;
+    }
+    .step-desc { font-size: 0.85rem; line-height: 1.7; color: #7a6558; }
+
+    /* ── TESTIMONIALS ── */
+    .testimonials { background: var(--brown); padding: 7rem 4rem; }
+    .testimonials-header { text-align: center; margin-bottom: 4rem; }
+    .testimonials-header .section-title { color: var(--cream); }
+    .testimonials-header .section-eyebrow { color: var(--gold); }
+    .testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+    .testi-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(197,164,109,0.2);
+      padding: 2.4rem;
+    }
+    .testi-stars { color: var(--gold); font-size: 0.9rem; letter-spacing: 0.1em; margin-bottom: 1.2rem; }
+    .testi-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem; font-style: italic; line-height: 1.7;
+      color: #e8ddd0; margin-bottom: 1.6rem;
+    }
+    .testi-author { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); }
+
+    /* ── NEWSLETTER ── */
+    .newsletter {
+      padding: 7rem 4rem; text-align: center;
+      background: linear-gradient(135deg, var(--cream) 0%, var(--sand) 100%);
+    }
+    .newsletter .section-title { margin-bottom: 0.8rem; }
+    .newsletter p { color: #7a6558; font-size: 0.98rem; margin-bottom: 2.4rem; }
+    .email-form { display: flex; gap: 0; max-width: 480px; margin: 0 auto; }
+    .email-input {
+      flex: 1; padding: 1rem 1.4rem;
+      border: 1px solid rgba(197,164,109,0.5); border-right: none;
+      background: var(--white); font-family: 'Jost', sans-serif;
+      font-size: 0.9rem; color: var(--charcoal); outline: none;
+    }
+    .email-input::placeholder { color: #b0a090; }
+    .email-input:focus { border-color: var(--gold); }
+    .btn-sub {
+      background: var(--gold); color: var(--white);
+      border: none; padding: 1rem 1.8rem;
+      font-family: 'Jost', sans-serif; font-size: 0.78rem;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.3s;
+    }
+    .btn-sub:hover { background: var(--gold-dk); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--charcoal); color: #888;
+      padding: 4rem 4rem 2.5rem;
+    }
+    .footer-top {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 3rem; margin-bottom: 3rem;
+    }
+    .footer-brand .nav-logo { display: inline-block; margin-bottom: 1rem; color: var(--cream); }
+    .footer-brand p { font-size: 0.85rem; line-height: 1.8; max-width: 260px; }
+    .footer-col h4 {
+      font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 1.2rem;
+    }
+    .footer-col ul { list-style: none; }
+    .footer-col ul li { margin-bottom: 0.6rem; }
+    .footer-col ul a {
+      text-decoration: none; color: #888; font-size: 0.85rem;
+      transition: color 0.3s;
+    }
+    .footer-col ul a:hover { color: var(--cream); }
+    .footer-bottom {
+      border-top: 1px solid #2a2a2a; padding-top: 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.78rem;
+    }
+    .footer-bottom a { color: #666; text-decoration: none; }
+    .footer-bottom a:hover { color: var(--gold); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 960px) {
+      nav { padding: 1.2rem 2rem; }
+      .nav-links { display: none; }
+      .hero { grid-template-columns: 1fr; padding: 7rem 2rem 4rem; text-align: center; }
+      .hero-text { max-width: 100%; }
+      .hero-desc { max-width: 100%; }
+      .hero-actions { justify-content: center; }
+      .hero-visual { margin-top: 3rem; }
+      .hero-circle { width: 280px; height: 280px; font-size: 6.5rem; }
+      .about { grid-template-columns: 1fr; padding: 5rem 2rem; gap: 3rem; }
+      .products { padding: 5rem 2rem; }
+      .products-grid { grid-template-columns: 1fr; }
+      .process { padding: 5rem 2rem; }
+      .process-steps { grid-template-columns: 1fr 1fr; }
+      .testimonials { padding: 5rem 2rem; }
+      .testi-grid { grid-template-columns: 1fr; }
+      .newsletter { padding: 5rem 2rem; }
+      .email-form { flex-direction: column; }
+      .email-input { border-right: 1px solid rgba(197,164,109,0.5); border-bottom: none; }
+      footer { padding: 3rem 2rem 2rem; }
+      .footer-top { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">Pel<span>ure</span></a>
+  <ul class="nav-links">
+    <li><a href="#products">Collection</a></li>
+    <li><a href="#about">Our Story</a></li>
+    <li><a href="#process">Craft</a></li>
+    <li><a href="#testimonials">Reviews</a></li>
+  </ul>
+  <button class="nav-cta">Shop Now</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-text">
+    <p class="hero-eyebrow">Artisan · Handpicked · Premium</p>
+    <h1 class="hero-title">
+      Nature's Finest,<br/>
+      <em>Perfectly Peeled</em>
+    </h1>
+    <p class="hero-desc">
+      Rare, hand-selected fruits sourced from the world's most prestigious orchards —
+      prepared with meticulous care and delivered to your door at peak perfection.
+    </p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">Explore Collection</button>
+      <button class="btn-outline">Our Story</button>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-circle">
+      🍊
+      <div class="badge">
+        <strong>100%</strong>
+        Organic<br/>Certified
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-strip">
+  <div class="marquee-inner">
+    <span>Hand-Selected Orchards</span><span>·</span>
+    <span>Artisan Preparation</span><span>·</span>
+    <span>Same-Day Harvest</span><span>·</span>
+    <span>Premium Gift Boxes</span><span>·</span>
+    <span>Worldwide Delivery</span><span>·</span>
+    <span>Organic Certified</span><span>·</span>
+    <span>Hand-Selected Orchards</span><span>·</span>
+    <span>Artisan Preparation</span><span>·</span>
+    <span>Same-Day Harvest</span><span>·</span>
+    <span>Premium Gift Boxes</span><span>·</span>
+    <span>Worldwide Delivery</span><span>·</span>
+    <span>Organic Certified</span><span>·</span>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="about-img-wrap">
+    <div class="about-img-box">🍋</div>
+    <div class="about-img-accent">
+      <span style="font-size:2rem">12</span>
+      <small>Years of<br/>Mastery</small>
+    </div>
+  </div>
+  <div>
+    <p class="section-eyebrow">Our Philosophy</p>
+    <h2 class="section-title">Where <em>Luxury</em><br/>Meets Nature</h2>
+    <p class="section-body">
+      Pelure was born from a simple conviction: the world's most exquisite fruits
+      deserve to be experienced at their absolute finest. We partner exclusively
+      with heritage orchards across Japan, Italy, and South America — growers
+      who share our devotion to patience and perfection.
+    </p>
+    <p class="section-body">
+      Every fruit is hand-selected at peak ripeness, then prepared by our master
+      artisans using time-honoured peeling techniques that preserve texture,
+      aroma, and nutritional integrity.
+    </p>
+    <div class="pill-row">
+      <span class="pill">Heritage Orchards</span>
+      <span class="pill">Cold-Chain Delivery</span>
+      <span class="pill">No Preservatives</span>
+      <span class="pill">Gift Ready</span>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section class="products" id="products">
+  <div class="products-header">
+    <p class="section-eyebrow">Our Collection</p>
+    <h2 class="section-title">Select Your <em>Indulgence</em></h2>
+  </div>
+  <div class="products-grid">
+
+    <div class="product-card">
+      <div class="product-emoji">🍑</div>
+      <p class="product-tag">Seasonal Rarity</p>
+      <h3 class="product-name">White Peach</h3>
+      <p class="product-desc">Sourced from the misty valleys of Okayama, Japan. Silken flesh with a whisper of honey and rose.</p>
+      <div class="product-price"><span>$</span>38<span>.00 / box</span></div>
+      <button class="btn-card">Add to Cart</button>
+    </div>
+
+    <div class="product-card card-featured">
+      <div class="featured-ribbon">Best Seller</div>
+      <div class="product-emoji">🍊</div>
+      <p class="product-tag">Signature Reserve</p>
+      <h3 class="product-name">Blood Orange</h3>
+      <p class="product-desc">Hand-peeled Moro oranges from Sicilian volcanic soil. Deep ruby flesh with a bittersweet complexity.</p>
+      <div class="product-price"><span>$</span>52<span>.00 / box</span></div>
+      <button class="btn-card">Add to Cart</button>
+    </div>
+
+    <div class="product-card">
+      <div class="product-emoji">🍈</div>
+      <p class="product-tag">Limited Edition</p>
+      <h3 class="product-name">Yuzu &amp; Pomelo</h3>
+      <p class="product-desc">A curated dual selection — aromatic Japanese yuzu and grand Thai pomelo with citrus floral notes.</p>
+      <div class="product-price"><span>$</span>64<span>.00 / box</span></div>
+      <button class="btn-card">Add to Cart</button>
+    </div>
+
+    <div class="product-card">
+      <div class="product-emoji">🥭</div>
+      <p class="product-tag">Tropical Prestige</p>
+      <h3 class="product-name">Alphonso Mango</h3>
+      <p class="product-desc">The undisputed king of mangoes, from Ratnagiri, India. Fibre-free, saffron-gold, and impossibly fragrant.</p>
+      <div class="product-price"><span>$</span>44<span>.00 / box</span></div>
+      <button class="btn-card">Add to Cart</button>
+    </div>
+
+    <div class="product-card">
+      <div class="product-emoji">🍋</div>
+      <p class="product-tag">Artisan Selection</p>
+      <h3 class="product-name">Amalfi Lemon</h3>
+      <p class="product-desc">From the UNESCO-listed cliffs of the Amalfi Coast. Thick, fragrant pith and intensely floral zest.</p>
+      <div class="product-price"><span>$</span>46<span>.00 / box</span></div>
+      <button class="btn-card">Add to Cart</button>
+    </div>
+
+    <div class="product-card">
+      <div class="product-emoji">🍇</div>
+      <p class="product-tag">Heritage Variety</p>
+      <h3 class="product-name">Muscat Grape</h3>
+      <p class="product-desc">Seedless Kyoho and Shine Muscat grapes, skinned to translucency. Floral, jammy, and ethereally sweet.</p>
+      <div class="product-price"><span>$</span>58<span>.00 / box</span></div>
+      <button class="btn-card">Add to Cart</button>
+    </div>
+
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="process" id="process">
+  <div class="process-header">
+    <p class="section-eyebrow">The Pelure Method</p>
+    <h2 class="section-title">Craft in <em>Four Steps</em></h2>
+  </div>
+  <div class="process-steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-icon">🌿</div>
+      <h3 class="step-title">Source</h3>
+      <p class="step-desc">We visit over 40 partner orchards annually to select only the top 3% of each harvest.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-icon">✋</div>
+      <h3 class="step-title">Handpick</h3>
+      <p class="step-desc">Each fruit is picked at dawn, at the precise moment of peak ripeness — never before, never after.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-icon">🔪</div>
+      <h3 class="step-title">Prepare</h3>
+      <p class="step-desc">Our artisans peel and present each fruit using techniques refined over decades of practice.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-icon">📦</div>
+      <h3 class="step-title">Deliver</h3>
+      <p class="step-desc">Packed in our signature chilled boxes and couriered directly to your door within 24 hours.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials" id="testimonials">
+  <div class="testimonials-header">
+    <p class="section-eyebrow">What Connoisseurs Say</p>
+    <h2 class="section-title">Voices of <em>Delight</em></h2>
+  </div>
+  <div class="testi-grid">
+    <div class="testi-card">
+      <div class="testi-stars">★ ★ ★ ★ ★</div>
+      <p class="testi-text">"The Blood Orange box arrived like a work of art. The flavour is unlike anything I have tasted from a conventional grocer. Pelure has ruined supermarket fruit for me forever."</p>
+      <p class="testi-author">— Isabelle M., Paris</p>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">★ ★ ★ ★ ★</div>
+      <p class="testi-text">"I sent the Alphonso Mango selection as a corporate gift and received more compliments than any bottle of wine I've ever gifted. Truly in a class of its own."</p>
+      <p class="testi-author">— James T., London</p>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">★ ★ ★ ★ ★</div>
+      <p class="testi-text">"As a pastry chef, provenance matters deeply to me. The Amalfi lemons from Pelure have become indispensable in my kitchen. The zest alone is extraordinary."</p>
+      <p class="testi-author">— Chef Naomi R., Tokyo</p>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="newsletter">
+  <p class="section-eyebrow">Join the Inner Circle</p>
+  <h2 class="section-title">First Access. <em>Exclusive Harvests.</em></h2>
+  <p>Subscribe to receive seasonal drops, private collection previews, and members-only offers.</p>
+  <form class="email-form" onsubmit="return false;">
+    <input class="email-input" type="email" placeholder="Your email address" />
+    <button class="btn-sub" type="submit">Subscribe</button>
+  </form>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a class="nav-logo" href="#">Pel<span style="color:var(--gold)">ure</span></a>
+      <p>Premium peeling fruits sourced from the world's finest orchards. Delivered with care, consumed with joy.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Shop</h4>
+      <ul>
+        <li><a href="#">All Products</a></li>
+        <li><a href="#">Seasonal Collection</a></li>
+        <li><a href="#">Gift Boxes</a></li>
+        <li><a href="#">Subscriptions</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">Partner Orchards</a></li>
+        <li><a href="#">Sustainability</a></li>
+        <li><a href="#">Press</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Help</h4>
+      <ul>
+        <li><a href="#">Shipping & Delivery</a></li>
+        <li><a href="#">Returns</a></li>
+        <li><a href="#">FAQ</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Pelure. All rights reserved.</span>
+    <div style="display:flex;gap:1.5rem;">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+      <a href="#">Cookie Preferences</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
