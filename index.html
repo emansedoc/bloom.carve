@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>bloom.carve — Edible Art, Made with Heart</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet" />
-  <!-- EmailJS SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1132,9 +1130,6 @@
   const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';     // Email Templates tab
   // ─────────────────────────────────────────
 
-  // Initialise EmailJS
-  emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-
   // ── Product data ──
   const products = {
     'Rose Bloom Box':        { emoji:'🌹', price:'$68 / box',  value:'Rose Bloom Box · $68' },
@@ -1220,17 +1215,25 @@
       special_requests: document.getElementById('notes').value.trim() || '(none)',
     };
 
+    // Guard: EmailJS not loaded or not configured yet
+    if (typeof emailjs === 'undefined') {
+      alert('Email service is not available. Please try again in a moment.');
+      submitBtn.textContent = '✦ Confirm Order';
+      submitBtn.disabled = false;
+      return;
+    }
+
     emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
       .then(function () {
-        // ✅ Success
+        // ✅ Success — show confirmation screen
         document.getElementById('successRef').textContent = 'Order Ref: #' + orderRef;
         document.getElementById('modalFormInner').classList.add('hide');
         document.getElementById('modalSuccess').classList.add('show');
         form.reset();
       })
       .catch(function (error) {
-        // ❌ Error
-        alert('Oops! Something went wrong sending your order.\n\nError: ' + (error.text || JSON.stringify(error)) + '\n\nPlease check your EmailJS configuration.');
+        // ❌ EmailJS error — show friendly message
+        alert('Oops! Could not send your order.\n\nError: ' + (error.text || JSON.stringify(error)) + '\n\nPlease check your EmailJS keys in the code.');
         console.error('EmailJS error:', error);
       })
       .finally(function () {
@@ -1239,33 +1242,49 @@
       });
   }
 
-  // Close on backdrop click
-  document.getElementById('orderModal').addEventListener('click', function (e) {
-    if (e.target === this) closeModal();
-  });
-
-  // Close on Escape key
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') closeModal();
-  });
-
-  // Hook all buttons
+  // ── Boot everything safely inside DOMContentLoaded ──
   document.addEventListener('DOMContentLoaded', function () {
+
+    // Init EmailJS — wrapped in try/catch so a bad key never breaks the modal
+    try {
+      if (typeof emailjs !== 'undefined') {
+        emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+      }
+    } catch (err) {
+      console.warn('EmailJS init skipped:', err);
+    }
+
+    // Nav CTA
     document.querySelector('.nav-cta').addEventListener('click', () => openModal('Rose Bloom Box'));
 
+    // Hero "Shop Gift Boxes" button
     document.querySelectorAll('.btn-primary').forEach(btn => {
       if (btn.textContent.includes('Shop') || btn.textContent.includes('Order')) {
         btn.addEventListener('click', () => openModal('Rose Bloom Box'));
       }
     });
 
+    // Product card buttons
     document.querySelectorAll('.product-card').forEach(card => {
       const btn  = card.querySelector('.btn-card');
       const name = card.querySelector('.product-name');
       if (btn && name) btn.addEventListener('click', () => openModal(name.textContent.trim()));
     });
+
+    // Backdrop click closes modal
+    document.getElementById('orderModal').addEventListener('click', function (e) {
+      if (e.target === this) closeModal();
+    });
+
+    // Escape key closes modal
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeModal();
+    });
   });
 </script>
+
+<!-- EmailJS SDK loaded LAST so it never blocks page or modal scripts -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
 </body>
 </html>
