@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>bloom.carve — Edible Art, Made with Heart</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet" />
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -487,6 +489,131 @@
       font-size: 0.72rem; color: #666;
     }
 
+    /* ── ORDER MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 999;
+      background: rgba(30,10,15,0.6);
+      backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1.5rem;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: var(--cream); width: 100%; max-width: 580px;
+      max-height: 92vh; overflow-y: auto;
+      position: relative;
+      transform: translateY(30px) scale(0.97);
+      transition: transform 0.35s ease;
+      border-top: 4px solid var(--rose);
+      box-shadow: 0 40px 100px rgba(107,45,62,0.3);
+    }
+    .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+    .modal-header {
+      padding: 2rem 2.4rem 1.2rem;
+      border-bottom: 1px solid rgba(200,104,126,0.15);
+      display: flex; align-items: flex-start; justify-content: space-between;
+    }
+    .modal-header-text {}
+    .modal-eyebrow {
+      font-size: 0.66rem; letter-spacing: 0.26em; text-transform: uppercase;
+      color: var(--sage); margin-bottom: 0.3rem;
+    }
+    .modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.9rem; font-weight: 400; color: var(--burgundy); line-height: 1.15;
+    }
+    .modal-title em { font-style: italic; color: var(--rose); }
+    .modal-close {
+      background: none; border: none; cursor: pointer;
+      font-size: 1.5rem; color: #b0909a; line-height: 1;
+      padding: 0.2rem 0.4rem; margin-top: -0.2rem;
+      transition: color 0.2s;
+    }
+    .modal-close:hover { color: var(--burgundy); }
+
+    .modal-body { padding: 1.8rem 2.4rem 2.4rem; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.1rem; }
+    .form-group.full { grid-column: span 2; }
+    .form-label {
+      font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--burgundy); font-weight: 400;
+    }
+    .form-label span { color: var(--rose); }
+    .form-control {
+      padding: 0.75rem 1rem;
+      border: 1px solid rgba(200,104,126,0.3);
+      background: var(--white); color: var(--charcoal);
+      font-family: 'Jost', sans-serif; font-size: 0.92rem;
+      outline: none; transition: border-color 0.25s, box-shadow 0.25s;
+      border-radius: 0;
+      appearance: none; -webkit-appearance: none;
+    }
+    .form-control:focus {
+      border-color: var(--rose);
+      box-shadow: 0 0 0 3px rgba(200,104,126,0.1);
+    }
+    select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c8687e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.5rem; }
+    textarea.form-control { resize: vertical; min-height: 90px; }
+
+    .order-summary {
+      background: var(--blush); border: 1px solid rgba(200,104,126,0.2);
+      padding: 1rem 1.3rem; margin-bottom: 1.4rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .order-summary-emoji { font-size: 2rem; }
+    .order-summary-info {}
+    .order-summary-label { font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--sage); }
+    .order-summary-name { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; color: var(--burgundy); }
+    .order-summary-price { font-size: 0.82rem; color: var(--rose-dk); }
+
+    .modal-footer {
+      display: flex; gap: 0.9rem; align-items: center;
+      padding: 1.2rem 2.4rem 2rem;
+      border-top: 1px solid rgba(200,104,126,0.12);
+    }
+    .btn-submit {
+      flex: 1; background: var(--burgundy); color: var(--white);
+      border: none; padding: 1rem;
+      font-family: 'Jost', sans-serif; font-size: 0.8rem;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.3s;
+    }
+    .btn-submit:hover { background: var(--rose); }
+    .btn-cancel {
+      background: transparent; color: var(--burgundy);
+      border: 1px solid rgba(200,104,126,0.4);
+      padding: 1rem 1.4rem;
+      font-family: 'Jost', sans-serif; font-size: 0.8rem;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.3s;
+    }
+    .btn-cancel:hover { border-color: var(--burgundy); }
+
+    /* success state */
+    .modal-success {
+      display: none; flex-direction: column; align-items: center;
+      justify-content: center; text-align: center;
+      padding: 3.5rem 2.4rem; min-height: 340px;
+    }
+    .modal-success.show { display: flex; }
+    .modal-form-inner.hide { display: none; }
+    .success-icon { font-size: 4rem; margin-bottom: 1.2rem; }
+    .success-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem; color: var(--burgundy); margin-bottom: 0.6rem;
+    }
+    .success-msg { font-size: 0.92rem; color: #7a5a63; line-height: 1.8; margin-bottom: 2rem; }
+    .success-ref {
+      font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--sage);
+    }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 1024px) {
       nav { padding: 1.2rem 2rem; }
@@ -859,6 +986,286 @@
     </div>
   </div>
 </footer>
+
+<!-- ── ORDER MODAL ── -->
+<div class="modal-overlay" id="orderModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+
+    <div class="modal-header">
+      <div class="modal-header-text">
+        <p class="modal-eyebrow">bloom.carve · Melbourne</p>
+        <h2 class="modal-title" id="modalTitle">Place Your <em>Order</em></h2>
+      </div>
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">✕</button>
+    </div>
+
+    <!-- FORM -->
+    <div class="modal-form-inner" id="modalFormInner">
+      <div class="modal-body">
+
+        <!-- selected product summary -->
+        <div class="order-summary" id="orderSummary">
+          <div class="order-summary-emoji" id="summaryEmoji">🌹</div>
+          <div class="order-summary-info">
+            <p class="order-summary-label">Your Selected Box</p>
+            <p class="order-summary-name" id="summaryName">Rose Bloom Box</p>
+            <p class="order-summary-price" id="summaryPrice">$68 / box</p>
+          </div>
+        </div>
+
+        <form id="orderForm" onsubmit="submitOrder(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="fname">First Name <span>*</span></label>
+              <input class="form-control" id="fname" type="text" placeholder="Sophie" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="lname">Last Name <span>*</span></label>
+              <input class="form-control" id="lname" type="text" placeholder="Lee" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="email">Email <span>*</span></label>
+              <input class="form-control" id="email" type="email" placeholder="sophie@email.com" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="phone">Phone <span>*</span></label>
+              <input class="form-control" id="phone" type="tel" placeholder="04xx xxx xxx" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="boxSelect">Gift Box <span>*</span></label>
+              <select class="form-control" id="boxSelect" required>
+                <option value="">— Select a box —</option>
+                <option value="Rose Bloom Box · $68">🌹 Rose Bloom Box · $68</option>
+                <option value="Strawberry Garden Box · $85">🍓 Strawberry Garden Box · $85</option>
+                <option value="Dragon Star Box · $72">🐉 Dragon Star Box · $72</option>
+                <option value="Orange Blossom Box · $58">🍊 Orange Blossom Box · $58</option>
+                <option value="Grand Melon Bouquet · $120">🍈 Grand Melon Bouquet · $120</option>
+                <option value="Custom Bloom Box · From $75">🎁 Custom Bloom Box · From $75</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="qty">Quantity <span>*</span></label>
+              <select class="form-control" id="qty" required>
+                <option value="1">1 box</option>
+                <option value="2">2 boxes</option>
+                <option value="3">3 boxes</option>
+                <option value="4">4 boxes</option>
+                <option value="5+">5+ boxes (contact us)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="occasion">Occasion <span>*</span></label>
+              <select class="form-control" id="occasion" required>
+                <option value="">— Select occasion —</option>
+                <option>🎂 Birthday</option>
+                <option>💍 Anniversary</option>
+                <option>🌸 Mother's Day</option>
+                <option>💝 Valentine's Day</option>
+                <option>🏢 Corporate Gift</option>
+                <option>💐 Just Because</option>
+                <option>🎉 Other Celebration</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="delivDate">Delivery Date <span>*</span></label>
+              <input class="form-control" id="delivDate" type="date" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="address">Delivery Address <span>*</span></label>
+            <input class="form-control" id="address" type="text" placeholder="123 Example St, Melbourne VIC 3000" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cardMsg">Gift Card Message <span style="color:var(--sage);font-size:0.62rem;">(optional)</span></label>
+            <textarea class="form-control" id="cardMsg" placeholder="e.g. Happy Birthday Mum! Wishing you a beautiful day filled with love 🌹"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="notes">Special Requests <span style="color:var(--sage);font-size:0.62rem;">(optional)</span></label>
+            <textarea class="form-control" id="notes" style="min-height:70px;" placeholder="e.g. Allergies, colour preferences, custom carving requests..."></textarea>
+          </div>
+        </form>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn-submit" onclick="submitOrder(event)">✦ Confirm Order</button>
+      </div>
+    </div>
+
+    <!-- SUCCESS STATE -->
+    <div class="modal-success" id="modalSuccess">
+      <div class="success-icon">🌹</div>
+      <h3 class="success-title">Order Received!</h3>
+      <p class="success-msg">
+        Thank you for your order. Our team will review your details and send a confirmation to your email within 1 hour.<br/><br/>
+        <em style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;color:var(--rose);">
+          "Edible Art. Made with Heart. Sent with Love."
+        </em>
+      </p>
+      <p class="success-ref" id="successRef">Order Ref: #BC-000000</p>
+      <br/>
+      <button class="btn-submit" style="max-width:220px;" onclick="closeModal()">Close</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ─────────────────────────────────────────
+  //  EmailJS Configuration
+  //  Replace these three values with yours from emailjs.com
+  // ─────────────────────────────────────────
+  const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';      // Account → API Keys
+  const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';      // Email Services tab
+  const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';     // Email Templates tab
+  // ─────────────────────────────────────────
+
+  // Initialise EmailJS
+  emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
+  // ── Product data ──
+  const products = {
+    'Rose Bloom Box':        { emoji:'🌹', price:'$68 / box',  value:'Rose Bloom Box · $68' },
+    'Strawberry Garden Box': { emoji:'🍓', price:'$85 / box',  value:'Strawberry Garden Box · $85' },
+    'Dragon Star Box':       { emoji:'🐉', price:'$72 / box',  value:'Dragon Star Box · $72' },
+    'Orange Blossom Box':    { emoji:'🍊', price:'$58 / box',  value:'Orange Blossom Box · $58' },
+    'Grand Melon Bouquet':   { emoji:'🍈', price:'$120 / box', value:'Grand Melon Bouquet · $120' },
+    'Custom Bloom Box':      { emoji:'🎁', price:'From $75',   value:'Custom Bloom Box · From $75' },
+  };
+
+  // ── Open modal ──
+  function openModal(productName) {
+    const modal = document.getElementById('orderModal');
+    const p = products[productName] || products['Rose Bloom Box'];
+
+    document.getElementById('summaryEmoji').textContent = p.emoji;
+    document.getElementById('summaryName').textContent  = productName || 'Rose Bloom Box';
+    document.getElementById('summaryPrice').textContent = p.price;
+
+    const sel = document.getElementById('boxSelect');
+    for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === p.value) { sel.selectedIndex = i; break; }
+    }
+
+    document.getElementById('modalFormInner').classList.remove('hide');
+    document.getElementById('modalSuccess').classList.remove('show');
+
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('delivDate').min = tomorrow.toISOString().split('T')[0];
+
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  // ── Close modal ──
+  function closeModal() {
+    document.getElementById('orderModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  // ── Submit order → send email via EmailJS ──
+  function submitOrder(e) {
+    if (e) e.preventDefault();
+    const form = document.getElementById('orderForm');
+
+    // Validate required fields
+    const requiredFields = form.querySelectorAll('[required]');
+    let valid = true;
+    requiredFields.forEach(el => {
+      el.style.borderColor = '';
+      el.style.boxShadow   = '';
+      if (!el.value.trim()) {
+        el.style.borderColor = 'var(--rose)';
+        el.style.boxShadow   = '0 0 0 3px rgba(200,104,126,0.15)';
+        valid = false;
+      }
+    });
+    if (!valid) {
+      form.querySelector('[style*="rose"]').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    // Generate unique order reference
+    const orderRef = 'BC-' + Math.floor(100000 + Math.random() * 900000);
+
+    // Loading state on button
+    const submitBtn = document.querySelector('.btn-submit');
+    submitBtn.textContent = '✦ Sending…';
+    submitBtn.disabled = true;
+
+    // Build template parameters (must match your EmailJS template variables)
+    const templateParams = {
+      order_ref:      orderRef,
+      customer_name:  document.getElementById('fname').value.trim() + ' ' + document.getElementById('lname').value.trim(),
+      customer_email: document.getElementById('email').value.trim(),
+      customer_phone: document.getElementById('phone').value.trim(),
+      gift_box:       document.getElementById('boxSelect').value,
+      quantity:       document.getElementById('qty').value,
+      occasion:       document.getElementById('occasion').value,
+      delivery_date:  document.getElementById('delivDate').value,
+      delivery_address: document.getElementById('address').value.trim(),
+      card_message:   document.getElementById('cardMsg').value.trim() || '(none)',
+      special_requests: document.getElementById('notes').value.trim() || '(none)',
+    };
+
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
+      .then(function () {
+        // ✅ Success
+        document.getElementById('successRef').textContent = 'Order Ref: #' + orderRef;
+        document.getElementById('modalFormInner').classList.add('hide');
+        document.getElementById('modalSuccess').classList.add('show');
+        form.reset();
+      })
+      .catch(function (error) {
+        // ❌ Error
+        alert('Oops! Something went wrong sending your order.\n\nError: ' + (error.text || JSON.stringify(error)) + '\n\nPlease check your EmailJS configuration.');
+        console.error('EmailJS error:', error);
+      })
+      .finally(function () {
+        submitBtn.textContent = '✦ Confirm Order';
+        submitBtn.disabled = false;
+      });
+  }
+
+  // Close on backdrop click
+  document.getElementById('orderModal').addEventListener('click', function (e) {
+    if (e.target === this) closeModal();
+  });
+
+  // Close on Escape key
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  // Hook all buttons
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelector('.nav-cta').addEventListener('click', () => openModal('Rose Bloom Box'));
+
+    document.querySelectorAll('.btn-primary').forEach(btn => {
+      if (btn.textContent.includes('Shop') || btn.textContent.includes('Order')) {
+        btn.addEventListener('click', () => openModal('Rose Bloom Box'));
+      }
+    });
+
+    document.querySelectorAll('.product-card').forEach(card => {
+      const btn  = card.querySelector('.btn-card');
+      const name = card.querySelector('.product-name');
+      if (btn && name) btn.addEventListener('click', () => openModal(name.textContent.trim()));
+    });
+  });
+</script>
 
 </body>
 </html>
