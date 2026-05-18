@@ -1128,6 +1128,7 @@
   const EMAILJS_PUBLIC_KEY  = 'ykor8Qkxwsl9edstB';      // Account → API Keys
   const EMAILJS_SERVICE_ID  = 'service_wbu65xw';      // Email Services tab
   const EMAILJS_TEMPLATE_ID = 'template_kf2k0ir';     // Email Templates tab
+  const EMAILJS_AUTOREPLY_ID = 'template_10jqirs';
   // ─────────────────────────────────────────
 
   // ── Product data ──
@@ -1224,6 +1225,7 @@
     }
 
     emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
+      .then(() => emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_AUTOREPLY_ID, templateParams))
       .then(function () {
         // ✅ Success — show confirmation screen
         document.getElementById('successRef').textContent = 'Order Ref: #' + orderRef;
