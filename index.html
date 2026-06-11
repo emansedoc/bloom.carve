@@ -1354,6 +1354,7 @@
           name:  templateParams.customer_name,
           email: templateParams.customer_email,
           box:   templateParams.gift_box,
+          qty:   templateParams.quantity,
         };
         document.getElementById('successRef').textContent = 'Order Ref: #' + orderRef;
         showPaymentInfo(templateParams.payment_method, templateParams.gift_box, orderRef);
@@ -1377,6 +1378,18 @@
     const box = document.getElementById('paymentInfo');
     if (!box) return;
 
+    // Work out the amount to pay (unit price × quantity)
+    const pName     = giftBox.split(' · ')[0];
+    const priceText = (products[pName] && products[pName].price) || giftBox.split(' · ')[1] || '';
+    const priceNum  = parseFloat((priceText.match(/[\d.]+/) || [0])[0]);
+    const qtyNum    = parseInt(lastOrder.qty, 10);
+    let amountText;
+    if (priceNum && qtyNum && !String(lastOrder.qty).includes('+')) {
+      amountText = '$' + (priceNum * qtyNum) + (qtyNum > 1 ? ` (${qtyNum} × $${priceNum})` : '');
+    } else {
+      amountText = priceText + ' — we will confirm the total by email';
+    }
+
     if (method === 'Bank Transfer') {
       box.innerHTML = `
         <div style="background:var(--blush); border:1px solid rgba(200,104,126,0.25); padding:1.2rem 1.4rem;">
@@ -1387,6 +1400,7 @@
             <tr><td style="color:#9a7a82;">BSB</td><td style="text-align:right;">${PAYMENT.bsb}</td></tr>
             <tr><td style="color:#9a7a82;">Account No.</td><td style="text-align:right;">${PAYMENT.accountNo}</td></tr>
             ${PAYMENT.payId ? `<tr><td style="color:#9a7a82;">PayID</td><td style="text-align:right;">${PAYMENT.payId}</td></tr>` : ''}
+            <tr><td style="color:#9a7a82;">Amount</td><td style="text-align:right; font-weight:500; color:var(--rose-dk);">${amountText}</td></tr>
             <tr><td style="color:#9a7a82;">Reference</td><td style="text-align:right; font-weight:500;">#${orderRef}</td></tr>
           </table>
           <p style="font-size:0.78rem; color:#9a7a82; line-height:1.7; margin-top:0.8rem;">
