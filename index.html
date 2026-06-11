@@ -1023,6 +1023,13 @@
           </div>
 
           <div class="form-group">
+            <label class="form-label" for="delivArea">Delivery Area <span>*</span></label>
+            <select class="form-control" id="delivArea" required>
+              <option value="">— Select delivery area —</option>
+            </select>
+          </div>
+
+          <div class="form-group">
             <label class="form-label" for="payMethod">Payment Method <span>*</span></label>
             <select class="form-control" id="payMethod" required>
               <option value="">— Select payment method —</option>
@@ -1106,6 +1113,14 @@
   // ─────────────────────────────────────────
   // 💳 Card payments switch — set to true when Stripe links are ready
   const CARD_PAYMENTS = false;
+
+  // 🚚 Delivery fees by area (null = quote by email)
+  const DELIVERY_FEES = {
+    'Melbourne CBD — FREE delivery':   0,
+    'Suburbs within 20 km — $19':      19,
+    'More than 20 km — $39':           39,
+    'Further away — quote by email':   null,
+  };
 
   const PAYMENT = {
     bankName:    'ING',     // your bank
@@ -1336,6 +1351,7 @@
       occasion:       document.getElementById('occasion').value,
       delivery_date:  document.getElementById('delivDate').value,
       delivery_address: document.getElementById('address').value.trim(),
+      delivery_area:  document.getElementById('delivArea').value,
       payment_method: document.getElementById('payMethod').value,
       card_message:   document.getElementById('cardMsg').value.trim() || '(none)',
       special_requests: document.getElementById('notes').value.trim() || '(none)',
@@ -1358,6 +1374,7 @@
           email: templateParams.customer_email,
           box:   templateParams.gift_box,
           qty:   templateParams.quantity,
+          area:  templateParams.delivery_area,
         };
         document.getElementById('successRef').textContent = 'Order Ref: #' + orderRef;
         showPaymentInfo(templateParams.payment_method, templateParams.gift_box, orderRef);
@@ -1381,16 +1398,33 @@
     const box = document.getElementById('paymentInfo');
     if (!box) return;
 
-    // Work out the amount to pay (unit price × quantity)
+    // Work out the amount to pay (unit price × quantity + delivery fee)
     const pName     = giftBox.split(' · ')[0];
     const priceText = (products[pName] && products[pName].price) || giftBox.split(' · ')[1] || '';
     const priceNum  = parseFloat((priceText.match(/[\d.]+/) || [0])[0]);
     const qtyNum    = parseInt(lastOrder.qty, 10);
-    let amountText;
+    const delivFee  = DELIVERY_FEES[lastOrder.area];  // 0 / 19 / 39 / null
+
+    let itemsText, deliveryText, amountText;
+
+    // items line
     if (priceNum && qtyNum && !String(lastOrder.qty).includes('+')) {
-      amountText = '$' + (priceNum * qtyNum) + (qtyNum > 1 ? ` (${qtyNum} × $${priceNum})` : '');
+      itemsText = '$' + (priceNum * qtyNum) + (qtyNum > 1 ? ` (${qtyNum} × $${priceNum})` : '');
     } else {
-      amountText = priceText + ' — we will confirm the total by email';
+      itemsText = priceText + ' × ' + lastOrder.qty;
+    }
+
+    // delivery line
+    if (delivFee === 0)            deliveryText = 'FREE (CBD)';
+    else if (delivFee === null ||
+             delivFee === undefined) deliveryText = 'Quoted by email';
+    else                           deliveryText = '$' + delivFee;
+
+    // total line
+    if (priceNum && qtyNum && !String(lastOrder.qty).includes('+') && typeof delivFee === 'number') {
+      amountText = '$' + (priceNum * qtyNum + delivFee);
+    } else {
+      amountText = 'Confirmed by email';
     }
 
     if (method === 'Bank Transfer') {
@@ -1403,7 +1437,9 @@
             <tr><td style="color:#9a7a82;">BSB</td><td style="text-align:right;">${PAYMENT.bsb}</td></tr>
             <tr><td style="color:#9a7a82;">Account No.</td><td style="text-align:right;">${PAYMENT.accountNo}</td></tr>
             ${PAYMENT.payId ? `<tr><td style="color:#9a7a82;">PayID</td><td style="text-align:right;">${PAYMENT.payId}</td></tr>` : ''}
-            <tr><td style="color:#9a7a82;">Amount</td><td style="text-align:right; font-weight:500; color:var(--rose-dk);">${amountText}</td></tr>
+            <tr><td style="color:#9a7a82;">Items</td><td style="text-align:right;">${itemsText}</td></tr>
+            <tr><td style="color:#9a7a82;">Delivery</td><td style="text-align:right;">${deliveryText}</td></tr>
+            <tr><td style="color:#9a7a82;">Total Amount</td><td style="text-align:right; font-weight:500; color:var(--rose-dk);">${amountText}</td></tr>
             <tr><td style="color:#9a7a82;">Reference</td><td style="text-align:right; font-weight:500;">#${orderRef}</td></tr>
           </table>
           <p style="font-size:0.78rem; color:#9a7a82; line-height:1.7; margin-top:0.8rem;">
@@ -1535,6 +1571,18 @@
     if (!CARD_PAYMENTS) {
       const cardOpt = document.querySelector('#payMethod option[value="Card"]');
       if (cardOpt) cardOpt.remove();
+    }
+
+    // Build the delivery area dropdown from DELIVERY_FEES
+    const areaSel = document.getElementById('delivArea');
+    if (areaSel) {
+      const icons = ['🏙️', '🏡', '🚗', '📧'];
+      Object.keys(DELIVERY_FEES).forEach((area, i) => {
+        const opt = document.createElement('option');
+        opt.value = area;
+        opt.textContent = (icons[i] || '📍') + ' ' + area;
+        areaSel.appendChild(opt);
+      });
     }
 
     // Init EmailJS — wrapped in try/catch so a bad key never breaks the modal
