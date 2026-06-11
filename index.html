@@ -1104,6 +1104,9 @@
   //  For card payments, create Payment Links at stripe.com and
   //  paste each product's link in its payLink field below.
   // ─────────────────────────────────────────
+  // 💳 Card payments switch — set to true when Stripe links are ready
+  const CARD_PAYMENTS = false;
+
   const PAYMENT = {
     bankName:    'ING',     // your bank
     accountName: 'Jiraporn Poommee',           // account holder name
@@ -1527,6 +1530,12 @@
 
     // 1️⃣ Render product cards from PRODUCTS list
     renderProducts();
+
+    // Hide the Card option while card payments are suspended
+    if (!CARD_PAYMENTS) {
+      const cardOpt = document.querySelector('#payMethod option[value="Card"]');
+      if (cardOpt) cardOpt.remove();
+    }
 
     // Init EmailJS — wrapped in try/catch so a bad key never breaks the modal
     try {
