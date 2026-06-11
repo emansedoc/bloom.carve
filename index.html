@@ -1080,6 +1080,22 @@
   const EMAILJS_SERVICE_ID  = 'service_wbu65xw';      // Email Services tab
   const EMAILJS_TEMPLATE_ID = 'template_kf2k0ir';     // Email Templates tab
   const EMAILJS_AUTOREPLY_ID = 'template_10jqirs';
+  const EMAILJS_PAYSLIP_ID   = 'template_10jqirs';  // pay slip notification (reuses the auto-reply template)
+  // ─────────────────────────────────────────
+
+  // ─────────────────────────────────────────
+  //  📎 PAY SLIP UPLOAD (free via Cloudinary)
+  //  The slip image is uploaded to your free Cloudinary account,
+  //  then the LINK is emailed to you — no paid EmailJS attachment needed.
+  //  Setup (5 min): cloudinary.com → free account →
+  //   1. Dashboard: copy your "Cloud name"
+  //   2. Settings → Upload → Upload presets → Add upload preset
+  //      → Signing mode: Unsigned → Save → copy preset name
+  // ─────────────────────────────────────────
+  const CLOUDINARY = {
+    cloudName:    'degalpngp',   // e.g. 'dq1abcxyz'
+    uploadPreset: 'payslips',   // e.g. 'payslips'
+  };
   // ─────────────────────────────────────────
 
   // ─────────────────────────────────────────
@@ -1333,6 +1349,12 @@
     emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
       .then(function () {
         // ✅ Success — show confirmation screen
+        lastOrder = {
+          ref:   orderRef,
+          name:  templateParams.customer_name,
+          email: templateParams.customer_email,
+          box:   templateParams.gift_box,
+        };
         document.getElementById('successRef').textContent = 'Order Ref: #' + orderRef;
         showPaymentInfo(templateParams.payment_method, templateParams.gift_box, orderRef);
         document.getElementById('modalFormInner').classList.add('hide');
@@ -1368,10 +1390,25 @@
             <tr><td style="color:#9a7a82;">Reference</td><td style="text-align:right; font-weight:500;">#${orderRef}</td></tr>
           </table>
           <p style="font-size:0.78rem; color:#9a7a82; line-height:1.7; margin-top:0.8rem;">
-            ⚠️ Please use <strong style="color:var(--rose-dk);">#${orderRef}</strong> as your transfer reference,
-            then reply to your confirmation email with the receipt.
+            ⚠️ Please use <strong style="color:var(--rose-dk);">#${orderRef}</strong> as your transfer reference.
             Your order is prepared once payment is confirmed.
           </p>
+        </div>
+
+        <div style="background:#fff; border:1px dashed rgba(200,104,126,0.45); padding:1.2rem 1.4rem; margin-top:0.9rem;">
+          <p style="font-size:0.68rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--sage); margin-bottom:0.7rem;">📎 Upload Your Pay Slip</p>
+          <p style="font-size:0.78rem; color:#9a7a82; line-height:1.7; margin-bottom:0.8rem;">
+            Already transferred? Attach a photo or screenshot of your payment slip and we'll confirm your order.
+          </p>
+          <input type="file" id="slipFile" accept="image/*"
+                 style="width:100%; font-size:0.8rem; color:var(--burgundy); margin-bottom:0.8rem;" />
+          <button id="slipBtn" onclick="sendPaySlip()"
+                  style="width:100%; background:var(--rose); color:#fff; border:none; padding:0.85rem;
+                         font-family:'Jost',sans-serif; font-size:0.76rem; letter-spacing:0.18em;
+                         text-transform:uppercase; cursor:pointer;">
+            Send Pay Slip ✦
+          </button>
+          <p id="slipStatus" style="font-size:0.78rem; line-height:1.6; margin-top:0.7rem; color:var(--sage); text-align:center;"></p>
         </div>`;
     } else if (method === 'Card') {
       const productName = giftBox.split(' · ')[0];
@@ -1403,6 +1440,70 @@
     } else {
       box.innerHTML = '';
     }
+  }
+
+  // ── Pay slip upload (bank transfer) ──
+  let lastOrder = { ref: '', name: '', email: '', box: '' };
+
+  function sendPaySlip() {
+    const fileInput = document.getElementById('slipFile');
+    const status    = document.getElementById('slipStatus');
+    const btn       = document.getElementById('slipBtn');
+
+    if (!fileInput || !fileInput.files.length) {
+      status.style.color = 'var(--rose-dk)';
+      status.textContent = 'Please choose your payment slip image first.';
+      return;
+    }
+
+    if (!CLOUDINARY.cloudName || !CLOUDINARY.uploadPreset) {
+      status.style.color = 'var(--rose-dk)';
+      status.textContent = 'Upload is not available right now — please reply to your confirmation email with the receipt instead.';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    status.style.color = 'var(--sage)';
+    status.textContent = 'Uploading your pay slip…';
+
+    // 1️⃣ Upload the slip image to Cloudinary (free)
+    const fd = new FormData();
+    fd.append('file', fileInput.files[0]);
+    fd.append('upload_preset', CLOUDINARY.uploadPreset);
+
+    fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY.cloudName + '/image/upload', {
+      method: 'POST',
+      body: fd,
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Upload failed (' + res.status + ')');
+        return res.json();
+      })
+      .then(data => {
+        // 2️⃣ Email the slip LINK to the owner (tiny request — free plan OK)
+        status.textContent = 'Notifying the shop…';
+        return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_PAYSLIP_ID, {
+          order_ref:      lastOrder.ref,
+          customer_name:  lastOrder.name,
+          customer_email: lastOrder.email,
+          gift_box:       lastOrder.box,
+          slip_url:       data.secure_url,
+        });
+      })
+      .then(function () {
+        btn.style.background = 'var(--sage)';
+        btn.textContent = '✓ Pay Slip Sent';
+        status.style.color = 'var(--sage)';
+        status.textContent = 'Thank you! We’ve received your pay slip and will confirm your order shortly. 🌹';
+      })
+      .catch(function (error) {
+        btn.disabled = false;
+        btn.textContent = 'Send Pay Slip ✦';
+        status.style.color = 'var(--rose-dk)';
+        status.textContent = 'Could not send the pay slip — please reply to your confirmation email with the receipt instead.';
+        console.error('Pay slip send error:', error);
+      });
   }
 
   // ── Boot everything safely inside DOMContentLoaded ──
