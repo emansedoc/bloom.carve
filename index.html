@@ -1495,15 +1495,17 @@
         return res.json();
       })
       .then(data => {
-        // 2️⃣ Email the slip LINK to the owner (tiny request — free plan OK)
+        // 2️⃣ Send two emails: slip link to the OWNER + confirmation to the CUSTOMER
         status.textContent = 'Notifying the shop…';
-        return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_PAYSLIP_ID, {
+        const slipParams = {
           order_ref:      lastOrder.ref,
           customer_name:  lastOrder.name,
           customer_email: lastOrder.email,
           gift_box:       lastOrder.box,
           slip_url:       data.secure_url,
-        });
+        };
+        return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, slipParams)     // → owner
+          .then(() => emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_PAYSLIP_ID, slipParams)); // → customer
       })
       .then(function () {
         btn.style.background = 'var(--sage)';
