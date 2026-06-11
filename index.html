@@ -1023,6 +1023,15 @@
           </div>
 
           <div class="form-group">
+            <label class="form-label" for="payMethod">Payment Method <span>*</span></label>
+            <select class="form-control" id="payMethod" required>
+              <option value="">— Select payment method —</option>
+              <option value="Card">💳 Card (secure online payment)</option>
+              <option value="Bank Transfer">🏦 Bank Transfer</option>
+            </select>
+          </div>
+
+          <div class="form-group">
             <label class="form-label" for="cardMsg">Gift Card Message <span style="color:var(--sage);font-size:0.62rem;">(optional)</span></label>
             <textarea class="form-control" id="cardMsg" placeholder="e.g. Happy Birthday Mum! Wishing you a beautiful day filled with love 🌹"></textarea>
           </div>
@@ -1051,6 +1060,10 @@
         </em>
       </p>
       <p class="success-ref" id="successRef">Order Ref: #BC-000000</p>
+
+      <!-- payment instructions (filled by JS based on chosen method) -->
+      <div id="paymentInfo" style="margin-top:1.6rem; width:100%; max-width:380px; text-align:left;"></div>
+
       <br/>
       <button class="btn-submit" style="max-width:220px;" onclick="closeModal()">Close</button>
     </div>
@@ -1069,6 +1082,21 @@
   const EMAILJS_AUTOREPLY_ID = 'template_10jqirs';
   // ─────────────────────────────────────────
 
+  // ─────────────────────────────────────────
+  //  💳 PAYMENT SETTINGS — Edit with your details
+  //  Bank details are shown to customers who choose Bank Transfer.
+  //  For card payments, create Payment Links at stripe.com and
+  //  paste each product's link in its payLink field below.
+  // ─────────────────────────────────────────
+  const PAYMENT = {
+    bankName:    'ING',     // your bank
+    accountName: 'Jiraporn Poommee',           // account holder name
+    bsb:         '923-100',               // your BSB
+    accountNo:   '318422297',             // your account number
+    payId:       '',                      // optional PayID (email/phone), leave '' to hide
+  };
+  // ─────────────────────────────────────────
+
   // ═══════════════════════════════════════════════════════
   //  🌹 PRODUCTS LIST — Edit here to add / change products
   //
@@ -1079,6 +1107,10 @@
   //   image    → photo of the product! e.g. 'images/rose-box.jpg'
   //              or a full URL 'https://...jpg'
   //              leave '' to show the emoji instead
+  //   payLink  → Stripe Payment Link for card payments
+  //              e.g. 'https://buy.stripe.com/xxxx'
+  //              leave '' → card customers are told a payment
+  //              link will be emailed to them instead
   //   imgStyle → card background colour: "" / "img-gold" / "img-sage"
   //   desc     → short description shown on the card
   //   price    → price text  e.g. "$68" or "From $75"
@@ -1098,6 +1130,7 @@
       tag:      'Signature Series',
       emoji:    '🌹',
       image:    'images/especially-for-you.jpg',
+      payLink:  '',
       imgStyle: '',
       desc:     'Hand-carved apple feathers, a green apple lotus, and fresh orchids nestled in a cream keepsake box with a dusty-pink ribbon and "Especially for You" tag.',
       price:    '$68',
@@ -1111,6 +1144,7 @@
       tag:      'Best Seller',
       emoji:    '🍓',
       image:    'images/birthday-bloom.jpg',
+      payLink:  '',
       imgStyle: '',
       desc:     'A kiwi starburst, strawberry rose, dragon fruit spiral, and carved apple star — arranged with carnations in our blush pink birthday box with a personalised message card.',
       price:    '$85',
@@ -1124,6 +1158,7 @@
       tag:      'Petite Collection',
       emoji:    '💝',
       image:    'images/thanks-love.jpg',
+      payLink:  '',
       imgStyle: 'img-sage',
       desc:     'Our sweetest little thank-you — a carved kiwi bloom, grape teardrop, and orange slices beside a bed of roses, in a clear-lid acrylic box. Choose red or pink.',
       price:    '$48',
@@ -1137,6 +1172,7 @@
       tag:      'Seasonal Edition',
       emoji:    '🌸',
       image:    'images/mothers-day.jpg',
+      payLink:  '',
       imgStyle: 'img-gold',
       desc:     'A blooming garden of carved papaya, melon chrysanthemums, watermelon-radish rose, and fresh carnations — our most colourful tribute to Mum.',
       price:    '$98',
@@ -1150,6 +1186,7 @@
       tag:      'Grand Luxury',
       emoji:    '🍈',
       image:    'images/grand-keepsake.jpg',
+      payLink:  '',
       imgStyle: '',
       desc:     'Strawberry roses, carved melon dahlias, and golden kiwi in a timber frame box with velvet ribbon, fresh flowers, and an engraved wooden message token.',
       price:    '$120',
@@ -1168,6 +1205,7 @@
       emoji: p.emoji,
       price: p.price + (p.perBox ? ' ' + p.perBox : ''),
       value: p.name + ' · ' + p.price,
+      payLink: p.payLink || '',
     };
   });
 
@@ -1279,6 +1317,7 @@
       occasion:       document.getElementById('occasion').value,
       delivery_date:  document.getElementById('delivDate').value,
       delivery_address: document.getElementById('address').value.trim(),
+      payment_method: document.getElementById('payMethod').value,
       card_message:   document.getElementById('cardMsg').value.trim() || '(none)',
       special_requests: document.getElementById('notes').value.trim() || '(none)',
     };
@@ -1295,6 +1334,7 @@
       .then(function () {
         // ✅ Success — show confirmation screen
         document.getElementById('successRef').textContent = 'Order Ref: #' + orderRef;
+        showPaymentInfo(templateParams.payment_method, templateParams.gift_box, orderRef);
         document.getElementById('modalFormInner').classList.add('hide');
         document.getElementById('modalSuccess').classList.add('show');
         form.reset();
@@ -1308,6 +1348,61 @@
         submitBtn.textContent = '✦ Confirm Order';
         submitBtn.disabled = false;
       });
+  }
+
+  // ── Show payment instructions on the success screen ──
+  function showPaymentInfo(method, giftBox, orderRef) {
+    const box = document.getElementById('paymentInfo');
+    if (!box) return;
+
+    if (method === 'Bank Transfer') {
+      box.innerHTML = `
+        <div style="background:var(--blush); border:1px solid rgba(200,104,126,0.25); padding:1.2rem 1.4rem;">
+          <p style="font-size:0.68rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--sage); margin-bottom:0.7rem;">🏦 Bank Transfer Details</p>
+          <table style="width:100%; font-size:0.85rem; color:var(--burgundy); line-height:2;">
+            <tr><td style="color:#9a7a82;">Bank</td><td style="text-align:right;">${PAYMENT.bankName}</td></tr>
+            <tr><td style="color:#9a7a82;">Account Name</td><td style="text-align:right;">${PAYMENT.accountName}</td></tr>
+            <tr><td style="color:#9a7a82;">BSB</td><td style="text-align:right;">${PAYMENT.bsb}</td></tr>
+            <tr><td style="color:#9a7a82;">Account No.</td><td style="text-align:right;">${PAYMENT.accountNo}</td></tr>
+            ${PAYMENT.payId ? `<tr><td style="color:#9a7a82;">PayID</td><td style="text-align:right;">${PAYMENT.payId}</td></tr>` : ''}
+            <tr><td style="color:#9a7a82;">Reference</td><td style="text-align:right; font-weight:500;">#${orderRef}</td></tr>
+          </table>
+          <p style="font-size:0.78rem; color:#9a7a82; line-height:1.7; margin-top:0.8rem;">
+            ⚠️ Please use <strong style="color:var(--rose-dk);">#${orderRef}</strong> as your transfer reference,
+            then reply to your confirmation email with the receipt.
+            Your order is prepared once payment is confirmed.
+          </p>
+        </div>`;
+    } else if (method === 'Card') {
+      const productName = giftBox.split(' · ')[0];
+      const payLink = (products[productName] && products[productName].payLink) || '';
+      if (payLink) {
+        const url = payLink + (payLink.includes('?') ? '&' : '?') + 'client_reference_id=' + orderRef;
+        box.innerHTML = `
+          <div style="background:var(--blush); border:1px solid rgba(200,104,126,0.25); padding:1.2rem 1.4rem; text-align:center;">
+            <p style="font-size:0.68rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--sage); margin-bottom:0.9rem;">💳 Complete Your Payment</p>
+            <a href="${url}" target="_blank" rel="noopener"
+               style="display:block; background:var(--burgundy); color:#fff; text-decoration:none; padding:0.95rem;
+                      font-size:0.78rem; letter-spacing:0.2em; text-transform:uppercase; transition:background 0.3s;">
+              Pay Now by Card →
+            </a>
+            <p style="font-size:0.76rem; color:#9a7a82; line-height:1.7; margin-top:0.8rem;">
+              Secure payment powered by Stripe. Your order ref <strong style="color:var(--rose-dk);">#${orderRef}</strong> is attached automatically.
+            </p>
+          </div>`;
+      } else {
+        box.innerHTML = `
+          <div style="background:var(--blush); border:1px solid rgba(200,104,126,0.25); padding:1.2rem 1.4rem; text-align:center;">
+            <p style="font-size:0.68rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--sage); margin-bottom:0.7rem;">💳 Card Payment</p>
+            <p style="font-size:0.84rem; color:var(--burgundy); line-height:1.8;">
+              We'll email you a secure card payment link for your order
+              <strong style="color:var(--rose-dk);">#${orderRef}</strong> shortly.
+            </p>
+          </div>`;
+      }
+    } else {
+      box.innerHTML = '';
+    }
   }
 
   // ── Boot everything safely inside DOMContentLoaded ──
