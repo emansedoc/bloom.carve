@@ -296,6 +296,13 @@
     .product-img.img-gold { background: linear-gradient(145deg, #f7ecd8, #e8d3b0); }
     .product-img.img-dark { background: linear-gradient(145deg, #3d1a24, #6b2d3e); }
     .product-img.img-sage { background: linear-gradient(145deg, #dde8d8, #c4d4bc); }
+    .product-img img {
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: center;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+    .product-card:hover .product-img img { transform: scale(1.06); }
     .product-body { padding: 1.8rem 1.8rem 2rem; flex: 1; display: flex; flex-direction: column; }
     .product-tag {
       font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase;
@@ -747,90 +754,8 @@
     <p class="section-eyebrow">Our Collection</p>
     <h2 class="section-title">Signature <em>Gift Boxes</em></h2>
   </div>
-  <div class="products-grid">
-
-    <div class="product-card">
-      <div class="product-img" style="position:relative;">
-        🌹
-      </div>
-      <div class="product-body">
-        <p class="product-tag">Signature Series</p>
-        <h3 class="product-name">Rose Bloom Box</h3>
-        <p class="product-desc">A lush arrangement of watermelon, strawberry, and dragon fruit hand-carved into full-bloom roses. Our most iconic creation, wrapped in a luxury gift box.</p>
-        <div class="product-footer">
-          <div class="product-price">$68 <small>/ box</small></div>
-          <button class="btn-card">Order Now</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="product-card card-featured" style="position:relative;">
-      <div class="featured-badge">Most Loved ✦</div>
-      <div class="product-img">🍓</div>
-      <div class="product-body">
-        <p class="product-tag">Best Seller</p>
-        <h3 class="product-name">Strawberry Garden Box</h3>
-        <p class="product-desc">Fresh strawberries and seasonal fruits sculpted into delicate floral clusters. Presented in our signature pink ribbon box — perfect for birthdays and anniversaries.</p>
-        <div class="product-footer">
-          <div class="product-price">$85 <small>/ box</small></div>
-          <button class="btn-card">Order Now</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="product-card">
-      <div class="product-img img-sage">🐉</div>
-      <div class="product-body">
-        <p class="product-tag">Exotic Collection</p>
-        <h3 class="product-name">Dragon Star Box</h3>
-        <p class="product-desc">A show-stopping carved dragon fruit star, surrounded by melon flowers and kiwi blooms. A statement piece for those who love the extraordinary.</p>
-        <div class="product-footer">
-          <div class="product-price">$72 <small>/ box</small></div>
-          <button class="btn-card">Order Now</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="product-card">
-      <div class="product-img img-gold">🍊</div>
-      <div class="product-body">
-        <p class="product-tag">Citrus Bloom</p>
-        <h3 class="product-name">Orange Blossom Box</h3>
-        <p class="product-desc">Mandarin and orange segments carved into delicate butterfly and blossom shapes, nestled among fresh daisies. Bright, fragrant, and utterly captivating.</p>
-        <div class="product-footer">
-          <div class="product-price">$58 <small>/ box</small></div>
-          <button class="btn-card">Order Now</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="product-card">
-      <div class="product-img">🍈</div>
-      <div class="product-body">
-        <p class="product-tag">Grand Luxury</p>
-        <h3 class="product-name">Grand Melon Bouquet</h3>
-        <p class="product-desc">A full bouquet of carved honeydew and rockmelon roses in a wooden keepsake tray. Our grandest creation — made to leave a lasting impression.</p>
-        <div class="product-footer">
-          <div class="product-price">$120 <small>/ box</small></div>
-          <button class="btn-card">Order Now</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="product-card">
-      <div class="product-img img-gold">🎁</div>
-      <div class="product-body">
-        <p class="product-tag">Fully Bespoke</p>
-        <h3 class="product-name">Custom Bloom Box</h3>
-        <p class="product-desc">Design your own. Choose your fruits, florals, message card, and box style. We'll hand-carve a one-of-a-kind edible arrangement made just for your occasion.</p>
-        <div class="product-footer">
-          <div class="product-price">From $75 <small></small></div>
-          <button class="btn-card">Enquire</button>
-        </div>
-      </div>
-    </div>
-
-  </div>
+  <!-- ✅ Products are generated automatically from the PRODUCTS list in the script below -->
+  <div class="products-grid" id="productsGrid"></div>
 </section>
 
 <!-- OCCASIONS -->
@@ -1131,15 +1056,157 @@
   const EMAILJS_AUTOREPLY_ID = 'template_10jqirs';
   // ─────────────────────────────────────────
 
-  // ── Product data ──
-  const products = {
-    'Rose Bloom Box':        { emoji:'🌹', price:'$68 / box',  value:'Rose Bloom Box · $68' },
-    'Strawberry Garden Box': { emoji:'🍓', price:'$85 / box',  value:'Strawberry Garden Box · $85' },
-    'Dragon Star Box':       { emoji:'🐉', price:'$72 / box',  value:'Dragon Star Box · $72' },
-    'Orange Blossom Box':    { emoji:'🍊', price:'$58 / box',  value:'Orange Blossom Box · $58' },
-    'Grand Melon Bouquet':   { emoji:'🍈', price:'$120 / box', value:'Grand Melon Bouquet · $120' },
-    'Custom Bloom Box':      { emoji:'🎁', price:'From $75',   value:'Custom Bloom Box · From $75' },
-  };
+  // ═══════════════════════════════════════════════════════
+  //  🌹 PRODUCTS LIST — Edit here to add / change products
+  //
+  //  Each product needs:
+  //   name     → the product name (shown on card & order form)
+  //   tag      → small label above the name  e.g. "Best Seller"
+  //   emoji    → fallback icon shown when no image is set
+  //   image    → photo of the product! e.g. 'images/rose-box.jpg'
+  //              or a full URL 'https://...jpg'
+  //              leave '' to show the emoji instead
+  //   imgStyle → card background colour: "" / "img-gold" / "img-sage"
+  //   desc     → short description shown on the card
+  //   price    → price text  e.g. "$68" or "From $75"
+  //   perBox   → unit label  e.g. "/ box"  (leave "" if not needed)
+  //   featured → true = dark rose highlight card, false = normal card
+  //   badge    → text shown on featured ribbon  e.g. "Most Loved ✦"
+  //              (only appears when featured: true)
+  //   btnText  → button label  e.g. "Order Now" or "Enquire"
+  //
+  //  TO ADD A PRODUCT  → copy one block, paste below, fill in details
+  //  TO REMOVE         → delete the whole { ... } block
+  //  TO REORDER        → drag / cut-paste the blocks in any order
+  // ═══════════════════════════════════════════════════════
+  const PRODUCTS = [
+    {
+      name:     'Rose Bloom Box',
+      tag:      'Signature Series',
+      emoji:    '🌹',
+      image:    '',
+      imgStyle: '',
+      desc:     'A lush arrangement of watermelon, strawberry, and dragon fruit hand-carved into full-bloom roses. Our most iconic creation, wrapped in a luxury gift box.',
+      price:    '$68',
+      perBox:   '/ box',
+      featured: false,
+      badge:    '',
+      btnText:  'Order Now',
+    },
+    {
+      name:     'Strawberry Garden Box',
+      tag:      'Best Seller',
+      emoji:    '🍓',
+      image:    '',
+      imgStyle: '',
+      desc:     'Fresh strawberries and seasonal fruits sculpted into delicate floral clusters. Presented in our signature pink ribbon box — perfect for birthdays and anniversaries.',
+      price:    '$85',
+      perBox:   '/ box',
+      featured: true,
+      badge:    'Most Loved ✦',
+      btnText:  'Order Now',
+    },
+    {
+      name:     'Dragon Star Box',
+      tag:      'Exotic Collection',
+      emoji:    '🐉',
+      image:    '',
+      imgStyle: 'img-sage',
+      desc:     'A show-stopping carved dragon fruit star, surrounded by melon flowers and kiwi blooms. A statement piece for those who love the extraordinary.',
+      price:    '$72',
+      perBox:   '/ box',
+      featured: false,
+      badge:    '',
+      btnText:  'Order Now',
+    },
+    {
+      name:     'Orange Blossom Box',
+      tag:      'Citrus Bloom',
+      emoji:    '🍊',
+      image:    '',
+      imgStyle: 'img-gold',
+      desc:     'Mandarin and orange segments carved into delicate butterfly and blossom shapes, nestled among fresh daisies. Bright, fragrant, and utterly captivating.',
+      price:    '$58',
+      perBox:   '/ box',
+      featured: false,
+      badge:    '',
+      btnText:  'Order Now',
+    },
+    {
+      name:     'Grand Melon Bouquet',
+      tag:      'Grand Luxury',
+      emoji:    '🍈',
+      image:    '',
+      imgStyle: '',
+      desc:     'A full bouquet of carved honeydew and rockmelon roses in a wooden keepsake tray. Our grandest creation — made to leave a lasting impression.',
+      price:    '$120',
+      perBox:   '/ box',
+      featured: false,
+      badge:    '',
+      btnText:  'Order Now',
+    },
+    {
+      name:     'Custom Bloom Box',
+      tag:      'Fully Bespoke',
+      emoji:    '🎁',
+      image:    '',
+      imgStyle: 'img-gold',
+      desc:     'Design your own. Choose your fruits, florals, message card, and box style. We\'ll hand-carve a one-of-a-kind edible arrangement made just for your occasion.',
+      price:    'From $75',
+      perBox:   '',
+      featured: false,
+      badge:    '',
+      btnText:  'Enquire',
+    },
+  ];
+  // ═══════════════════════════════════════════════════════
+
+  // Build a lookup map used by the modal (auto-generated — do not edit)
+  const products = {};
+  PRODUCTS.forEach(p => {
+    products[p.name] = {
+      emoji: p.emoji,
+      price: p.price + (p.perBox ? ' ' + p.perBox : ''),
+      value: p.name + ' · ' + p.price,
+    };
+  });
+
+  // ── Render product cards into the grid ──
+  function renderProducts() {
+    const grid = document.getElementById('productsGrid');
+    if (!grid) return;
+    grid.innerHTML = PRODUCTS.map(p => `
+      <div class="product-card${p.featured ? ' card-featured' : ''}" style="position:relative;">
+        ${p.featured && p.badge ? `<div class="featured-badge">${p.badge}</div>` : ''}
+        <div class="product-img ${p.imgStyle}">${p.image ? `<img src="${p.image}" alt="${p.name}" loading="lazy" />` : p.emoji}</div>
+        <div class="product-body">
+          <p class="product-tag">${p.tag}</p>
+          <h3 class="product-name">${p.name}</h3>
+          <p class="product-desc">${p.desc}</p>
+          <div class="product-footer">
+            <div class="product-price">${p.price}${p.perBox ? ` <small>${p.perBox}</small>` : ''}</div>
+            <button class="btn-card">${p.btnText}</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    // Attach click handlers to the newly created cards
+    grid.querySelectorAll('.product-card').forEach(card => {
+      const btn  = card.querySelector('.btn-card');
+      const name = card.querySelector('.product-name');
+      if (btn && name) btn.addEventListener('click', () => openModal(name.textContent.trim()));
+    });
+
+    // Rebuild the order form dropdown to match PRODUCTS
+    const sel = document.getElementById('boxSelect');
+    if (sel) {
+      sel.innerHTML = '<option value="">— Select a box —</option>' +
+        PRODUCTS.map(p =>
+          `<option value="${p.name} · ${p.price}">${p.emoji} ${p.name} · ${p.price}</option>`
+        ).join('');
+    }
+  }
 
   // ── Open modal ──
   function openModal(productName) {
@@ -1224,7 +1291,7 @@
       return;
     }
 
-    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams).then(() => emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_AUTOREPLY_ID, templateParams))
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
       .then(function () {
         // ✅ Success — show confirmation screen
         document.getElementById('successRef').textContent = 'Order Ref: #' + orderRef;
@@ -1246,6 +1313,9 @@
   // ── Boot everything safely inside DOMContentLoaded ──
   document.addEventListener('DOMContentLoaded', function () {
 
+    // 1️⃣ Render product cards from PRODUCTS list
+    renderProducts();
+
     // Init EmailJS — wrapped in try/catch so a bad key never breaks the modal
     try {
       if (typeof emailjs !== 'undefined') {
@@ -1255,22 +1325,16 @@
       console.warn('EmailJS init skipped:', err);
     }
 
-    // Nav CTA
-    document.querySelector('.nav-cta').addEventListener('click', () => openModal('Rose Bloom Box'));
+    // Nav CTA — opens modal with first product by default
+    document.querySelector('.nav-cta').addEventListener('click', () => openModal(PRODUCTS[0].name));
 
     // Hero "Shop Gift Boxes" button
     document.querySelectorAll('.btn-primary').forEach(btn => {
       if (btn.textContent.includes('Shop') || btn.textContent.includes('Order')) {
-        btn.addEventListener('click', () => openModal('Rose Bloom Box'));
+        btn.addEventListener('click', () => openModal(PRODUCTS[0].name));
       }
     });
-
-    // Product card buttons
-    document.querySelectorAll('.product-card').forEach(card => {
-      const btn  = card.querySelector('.btn-card');
-      const name = card.querySelector('.product-name');
-      if (btn && name) btn.addEventListener('click', () => openModal(name.textContent.trim()));
-    });
+    // (Product card buttons are wired inside renderProducts)
 
     // Backdrop click closes modal
     document.getElementById('orderModal').addEventListener('click', function (e) {
